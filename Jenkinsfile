@@ -5,9 +5,6 @@ pipeline {
         // Repositorio de código fuente de la aplicación Java (GR4)
         APP_REPO_URL = 'https://github.com/ErickBaja05/GR4_1BT3_622_26B.git'
         APP_BRANCH   = 'main'
-
-        // Versión dinámica basada en el número de build (1.0.1, 1.0.2, 1.0.3...)
-        IMAGE_TAG    = "1.0.${BUILD_NUMBER}"
     }
 
     stages {
@@ -45,14 +42,21 @@ pipeline {
                 script {
                     try {
                         withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                            // Toma dinámicamente el usuario de quien puso las credenciales
                             def targetRepo = "${DOCKER_USER}/owl-audit-app"
-                            echo "Autenticando y publicando en Docker Hub para el usuario '${DOCKER_USER}'..."
+                            
+                            // Consultar dinámicamente las etiquetas reales existentes en Docker Hub
+                            sh 'chmod +x get-next-tag.sh'
+                            def nextTag = sh(script: "./get-next-tag.sh ${targetRepo}", returnStdout: true).trim()
+
+                            echo "=========================================================================="
+                            echo "--> Ultima version detectada en Docker Hub. Publicando nueva version: ${nextTag}"
+                            echo "=========================================================================="
+                            
                             sh """
                                 echo "${DOCKER_PASS}" | docker login -u "${DOCKER_USER}" --password-stdin
-                                docker tag owl-audit-app:latest ${targetRepo}:${IMAGE_TAG}
+                                docker tag owl-audit-app:latest ${targetRepo}:${nextTag}
                                 docker tag owl-audit-app:latest ${targetRepo}:latest
-                                docker push ${targetRepo}:${IMAGE_TAG}
+                                docker push ${targetRepo}:${nextTag}
                                 docker push ${targetRepo}:latest
                             """
                         }
@@ -69,7 +73,7 @@ pipeline {
 
     post {
         success {
-            echo "Pipeline completado con éxito para la versión ${IMAGE_TAG}."
+            echo "Pipeline completado con éxito."
         }
         failure {
             echo "Hubo un error durante la compilación, pruebas o despliegue."
