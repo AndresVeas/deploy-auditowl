@@ -46,6 +46,7 @@ Descarga la imagen con la base `owl_auditv1` y las cuentas de usuario ya inicial
 docker run -d \
   --name db \
   --network app-net \
+  -v db_data:/var/lib/mysql \
   -e MARIADB_ROOT_PASSWORD=root \
   -e MARIADB_DATABASE=owl_auditv1 \
   -e MARIADB_USER=user \
@@ -53,6 +54,7 @@ docker run -d \
   -p 3306:3306 \
   andresveas/mariadb-owlaudit:latest
 ```
+*(Nota: El mapeo `-v db_data:/var/lib/mysql` crea un volumen persistente de Docker para que los datos registrados se guarden de forma permanente en su equipo aunque el contenedor sea apagado o reiniciado).*
 
 #### 3. Iniciar el contenedor de la Aplicación Web (OwlAudit):
 Descarga el empaquetado final de producción (`ROOT.war`) sobre Apache Tomcat 10.1 con Java 21:
@@ -88,6 +90,8 @@ services:
       MARIADB_PASSWORD: 12345
     ports:
       - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
     networks:
       - app-net
 
@@ -107,6 +111,9 @@ services:
       - DB_PASSWORD=12345
     networks:
       - app-net
+
+volumes:
+  db_data:
 
 networks:
   app-net:
@@ -228,18 +235,43 @@ Al volver a hacer clic en **Build Now**:
 
 ## 🧹 5. Limpieza y Detención de Contenedores
 
-Una vez finalizada la revisión, puede detener y remover los contenedores con los siguientes comandos:
+Dependiendo de si desea **conservar los datos** o **hacer una limpieza total**:
 
-```bash
-# Detener y remover la aplicación web y la base de datos
-docker rm -f webapp db
+### Opción 1: Detener los contenedores y CONSERVAR la Base de Datos
+* **Si utilizó Docker Compose:**
+  ```bash
+  docker compose down
+  ```
+  *(Detiene los contenedores y redes, pero **mantiene el volumen `db_data` intacto** para que los datos sigan disponibles la próxima vez que ejecute `docker compose up -d`).*
 
-# Remover la red virtual
-docker network rm app-net
+* **Si utilizó comandos Docker directos (`docker run`):**
+  ```bash
+  # Pausar/apagar los contenedores sin eliminarlos
+  docker stop webapp db mi-jenkins
+  ```
+  *(Si prefiere remover los contenedores con `docker rm -f webapp db`, el volumen `db_data` seguirá existiendo en Docker y volverá a enlazar sus datos cuando vuelva a ejecutar el comando con `-v db_data:/var/lib/mysql`).*
 
-# Detener y remover Jenkins
-docker rm -f mi-jenkins
-```
+---
+
+### Opción 2: Limpieza total (Borrar contenedores, redes y volumen de base de datos)
+Si desea reiniciar todo desde cero eliminando los datos creados durante la prueba:
+
+* **Si utilizó Docker Compose:**
+  ```bash
+  docker compose down -v
+  ```
+
+* **Si utilizó comandos Docker directos (`docker run`):**
+  ```bash
+  # Remover contenedores
+  docker rm -f webapp db mi-jenkins
+
+  # Remover la red virtual
+  docker network rm app-net
+
+  # Remover el volumen persistente de la base de datos
+  docker volume rm db_data
+  ```
 
 *(Opcional: Si desea eliminar también las imágenes descargadas para liberar espacio en disco):*
 ```bash
