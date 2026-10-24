@@ -1,20 +1,14 @@
 services:
   # Servicio de Base de Datos
   db:
-    image: mariadb:10.11
+    build: ./db
+    image: andresveas/mariadb-owlaudit:latest
     container_name: app-mariadb
     restart: unless-stopped
-    environment:
-      MARIADB_ROOT_PASSWORD: root_password
-      MARIADB_DATABASE: owl_auditv1
-      MARIADB_USER: user
-      MARIADB_PASSWORD: 12345
     ports:
       - "3306:3306"
     volumes:
       - db_data:/var/lib/mysql
-      # Ejecuta el script SQL en el primer arranque
-      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     networks:
       - app-net
     healthcheck:

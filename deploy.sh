@@ -10,8 +10,8 @@ echo -e "${BLUE}===========================================${NC}"
 echo -e "${BLUE}    Iniciando Despliegue del Sistema       ${NC}"
 echo -e "${BLUE}===========================================${NC}"
 
-echo -e "\n${GREEN}[1/3] Descargando imagen más reciente de la aplicación...${NC}"
-docker compose pull app || echo "Advertencia: No se pudo hacer pull remoto, usando imagen local existente si está disponible."
+echo -e "\n${GREEN}[1/3] Descargando imágenes más recientes (App y MariaDB)...${NC}"
+docker compose pull || echo "Advertencia: No se pudo hacer pull remoto, usando imágenes locales existentes si están disponibles."
 
 echo -e "\n${GREEN}[2/3] Levantando MariaDB y Tomcat...${NC}"
 docker compose up -d

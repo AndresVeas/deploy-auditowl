@@ -4,8 +4,8 @@ echo     Iniciando Despliegue del Sistema
 echo ===========================================
 
 echo.
-echo [1/3] Descargando imagen mas reciente de la aplicacion...
-docker compose pull app
+echo [1/3] Descargando imagenes mas recientes (App y MariaDB)...
+docker compose pull
 
 echo.
 echo [2/3] Levantando MariaDB y Tomcat...
