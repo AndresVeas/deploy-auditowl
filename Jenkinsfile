@@ -2,23 +2,31 @@ pipeline {
     agent any
 
     environment {
-        // Nombre del repositorio en Docker Hub: usuario/nombre-imagen
-        IMAGE_NAME = 'owlaudit/owl-audit-app'
-        IMAGE_TAG  = 'latest'
+        // Repositorio de código fuente de la aplicación Java (GR4)
+        APP_REPO_URL = 'https://github.com/ErickBaja05/GR4_1BT3_622_26B.git'
+        APP_BRANCH   = 'main'
+
+        // Configuración de imagen para Docker Hub
+        IMAGE_NAME   = 'owlaudit/owl-audit-app'
+        IMAGE_TAG    = 'latest'
     }
 
     stages {
-        stage('1. Checkout SCM') {
+        stage('1. Clonar Código de GR4') {
             steps {
-                echo 'Descargando el código del repositorio...'
-                checkout scm
+                echo "Descargando el código fuente de OwlAudit desde ${APP_REPO_URL} (rama: ${APP_BRANCH})..."
+                dir('source-code') {
+                    git branch: "${APP_BRANCH}", url: "${APP_REPO_URL}"
+                }
             }
         }
 
-        stage('2. Build y Tests (Maven)') {
+        stage('2. Build y Tests con Maven') {
             steps {
-                echo 'Compilando proyecto y ejecutando pruebas unitarias...'
-                sh 'mvn clean package -DskipTests=false'
+                echo 'Compilando proyecto Java y ejecutando las pruebas unitarias de GR4...'
+                dir('source-code') {
+                    sh 'mvn clean package -DskipTests=false'
+                }
             }
         }
 
@@ -27,8 +35,12 @@ pipeline {
                 branch 'main'
             }
             steps {
-                echo 'Empaquetando la aplicación en la imagen Tomcat (solo rama main)...'
-                sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
+                echo 'Copiando el archivo .war compilado y empaquetando en Tomcat...'
+                sh '''
+                    mkdir -p target
+                    cp source-code/target/*.war target/
+                    docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
+                '''
             }
         }
 
@@ -37,11 +49,10 @@ pipeline {
                 branch 'main'
             }
             environment {
-                // Credenciales configuradas en Jenkins solo requeridas para rama main
                 DOCKER_HUB_CREDS = credentials('dockerhub-credentials')
             }
             steps {
-                echo 'Autenticando y subiendo imagen a Docker Hub (solo rama main)...'
+                echo 'Autenticando y subiendo imagen terminada a Docker Hub...'
                 sh """
                     echo "${DOCKER_HUB_CREDS_PSW}" | docker login -u "${DOCKER_HUB_CREDS_USR}" --password-stdin
                     docker push ${IMAGE_NAME}:${IMAGE_TAG}
@@ -52,13 +63,13 @@ pipeline {
 
     post {
         success {
-            echo "Pipeline completado con éxito."
+            echo "Pipeline completado con éxito. La imagen ${IMAGE_NAME}:${IMAGE_TAG} está lista."
         }
         failure {
-            echo "Hubo un error en la ejecución del pipeline."
+            echo "Hubo un error durante la compilación, pruebas o despliegue."
         }
         always {
-            // Cierra la sesión de Docker para mantener el entorno limpio
+            // Limpia la sesión de Docker en el agente
             sh 'docker logout || true'
         }
     }
