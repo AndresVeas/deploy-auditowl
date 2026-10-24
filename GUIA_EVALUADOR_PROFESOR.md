@@ -1,5 +1,5 @@
 # 🎓 Guía de Evaluación y Ejecución para el Docente / Evaluador
-### Proyecto: OwlAudit — Aplicación de Prácticas de Programación Extrema (XP)
+### Proyecto: OwlAudit — Despliegue e Integración Continua
 **Grupo 4 | EPN - Metodologías Ágiles de Desarrollo de Software**
 
 ---
@@ -11,9 +11,9 @@
 
 ---
 
-## 📌 1. Enlaces a los Entregables Oficiales (Rúbrica de Evaluación)
+## 📌 1. Enlaces a los Entregables Oficiales
 
-En cumplimiento con los puntos **4, 6 y 8** de las especificaciones de la práctica:
+En cumplimiento con los requerimientos de la práctica:
 
 | Entregable | Enlace / Identificador |
 | :--- | :--- |
@@ -22,7 +22,7 @@ En cumplimiento con los puntos **4, 6 y 8** de las especificaciones de la práct
 | **Imagen Docker de la Aplicación Web (Docker Hub)** | [docker.io/andresveas/owl-audit-app:latest](https://hub.docker.com/r/andresveas/owl-audit-app) |
 | **Imagen Docker de Jenkins CI/CD (Docker Hub)** | [docker.io/andresveas/jenkins-owlaudit:latest](https://hub.docker.com/r/andresveas/jenkins-owlaudit) |
 | **Imagen Docker de MariaDB con Semilla (Docker Hub)** | [docker.io/andresveas/mariadb-owlaudit:latest](https://hub.docker.com/r/andresveas/mariadb-owlaudit) |
-| **Video 1: Prácticas XP (TDD y CI/CD con Jenkins - 4 min)** | *(Insertar enlace al video de 4 minutos)* |
+| **Video 1: Prácticas XP (4 min)** | *(Insertar enlace al video de 4 minutos)* |
 | **Video 2: Demostración de la Aplicación Web (2 min)** | *(Insertar enlace al video de 2 minutos)* |
 
 ---
@@ -41,7 +41,7 @@ docker network create app-net
 ```
 
 #### 2. Iniciar el contenedor de Base de Datos (MariaDB):
-Descarga la imagen con la base `owl_auditv1` y las cuentas de usuario de prueba ya inicializadas:
+Descarga la imagen con la base `owl_auditv1` y las cuentas de usuario ya inicializadas:
 ```bash
 docker run -d \
   --name db \
@@ -115,7 +115,7 @@ networks:
 
 ---
 
-## 🌐 3. Verificación de la Aplicación Web y Criterios de Aceptación
+## 🌐 3. Verificación de la Aplicación Web y Cuentas de Acceso
 
 Una vez levantados los contenedores:
 
@@ -124,25 +124,20 @@ Una vez levantados los contenedores:
 
 2. Inicie sesión utilizando cualquiera de los usuarios preconfigurados:
 
-| Rol | Correo Electrónico | Contraseña | Capacidades a Evaluar |
+| Rol | Correo Electrónico | Contraseña | Perfil / Acciones Disponibles |
 | :--- | :--- | :--- | :--- |
-| **Docente** | `docente@epn.edu.ec` | `docente123` | Consulta y gestión completa de auditorías de estudiantes, emisión de dictámenes, revisión de métricas de evolución. |
-| **Estudiante 1** | `estudiante1@epn.edu.ec` | `estudiante123` | Envío de repositorios GitHub para auditoría, consulta de evolución de calidad, solicitud de retroalimentación sobre hallazgos. |
-| **Estudiante 2** | `estudiante2@epn.edu.ec` | `estudiante456` | Cuenta secundaria para probar aislamiento de auditorías y proyectos independientes. |
-
-### Verificación de las Historias de Usuario del Incremento:
-* **HU 1 (Consultar Evolución de Calidad):** Permite contrastar dos auditorías consecutivas de un proyecto para evaluar la variación de porcentaje y el estado de cada regla (`Nuevo`, `Persistente` o `Corregido`).
-* **HU 2 (Solicitar Retroalimentación de Hallazgos):** Permite al estudiante seleccionar un hallazgo reportado y enviar una justificación o duda técnica al docente.
-* **HU 3 (Atender Feedback de Auditoría):** Permite al docente responder y cerrar la solicitud de retroalimentación cambiando el estado a atendido.
+| **Docente** | `docente@epn.edu.ec` | `docente123` | Consulta y gestión completa de auditorías, emisión de dictámenes y retroalimentación. |
+| **Estudiante 1** | `estudiante1@epn.edu.ec` | `estudiante123` | Envío de repositorios para auditoría, consulta de métricas de calidad y solicitudes de feedback. |
+| **Estudiante 2** | `estudiante2@epn.edu.ec` | `estudiante456` | Cuenta secundaria para probar aislamiento de auditorías independientes. |
 
 ---
 
 ## 🏗️ 4. Evaluación de la Integración Continua (Jenkins en Docker)
 
-Se ha creado una imagen personalizada de Jenkins (`andresveas/jenkins-owlaudit:latest`) que incluye:
-* **Docker CLI preinstalado**, permitiendo ejecutar comandos Docker desde adentro del contenedor contra el daemon del host.
+Se ha preparado una imagen personalizada de Jenkins (`andresveas/jenkins-owlaudit:latest`) que incluye:
+* **Docker CLI preinstalado**, permitiendo ejecutar comandos Docker contra el daemon del host.
 * **Apache Maven 3.9 + OpenJDK 21** para compilar y ejecutar las pruebas de software.
-* **Script de Autoprovisión Groovy (`init.groovy.d`)**: Configura el job `OwlAudit-Pipeline` de forma totalmente automática en el primer arranque, sin requerir configuración manual de plugins ni pipelines.
+* **Script de Autoprovisión Groovy (`init.groovy.d`)**: Configura el job `OwlAudit-Pipeline` de forma automática al iniciar el contenedor por primera vez.
 
 ### Paso 1: Ejecutar el Contenedor de Jenkins
 
@@ -191,32 +186,47 @@ docker exec mi-jenkins cat /var/jenkins_home/secrets/initialAdminPassword
 2. En el menú lateral izquierdo, haga clic en **Build Now** (Construir ahora).
 3. Ingrese a la ejecución en curso (ej. `#1`) y abra **Console Output**.
 4. Observará en tiempo real el ciclo de Integración Continua:
-   - **Clonado del repositorio fuente:** Descarga `GR4_1BT3_622_26B`.
-   - **Compilación y Pruebas Unitarias:** Ejecuta la batería de pruebas de Maven (JUnit 5 + Mockito).
+   - **Clonado del repositorio fuente:** Descarga el código desde GitHub.
+   - **Compilación y Pruebas Unitarias:** Ejecuta las pruebas automatizadas con Maven.
    - **Empaquetado Web:** Genera el archivo WAR de producción.
    - **Construcción de Imagen Docker:** Compila la imagen Tomcat usando el `Dockerfile`.
-   - **Verificación de Tags Dinámicos:** Consulta Docker Hub para determinar la versión correlativa.
 
 ---
 
-## 🧪 5. Evidencias de Prácticas de Programación Extrema (XP)
+### 📤 4.1. (Opcional) Probar la Carga de Imágenes a Docker Hub
 
-### A. Test-Driven Development (TDD)
-En el repositorio del código se encuentran implementadas y verificadas las pruebas requeridas:
-1. **4 Pruebas Unitarias Convencionales:** Pruebas de reglas de negocio en evaluadores (`ReglaLongitudMetodoTest`, `ReglaComentariosTest`, `ReglaComplejidadTest`, `CalculadorMetricasTest`).
-2. **1 Prueba Unitaria con Mocks (Mockito):** `DictamenSeveridadTest` en la capa de servicios, donde se aíslan mediante `@Mock` los DAOs (`ReglaDAO`, `AuditoriaDAO`) y el cliente externo (`GitHubClient`) para validar que una auditoría falla si presenta hallazgos de severidad ALTA.
-3. **1 Prueba Unitaria Parametrizada:** Evaluaciones de umbrales con `@ParameterizedTest` y `@ValueSource` / `@CsvSource` en reglas de cálculo de calidad.
-4. **Ciclo Red-Green-Refactor:** Evidenciado en el historial de commits y documentado en `docs/TDD/Franciel.md`.
+Por defecto, si ejecuta el pipeline sin configurar credenciales de Docker Hub, Jenkins ejecutará todas las etapas (clonado, compilación, pruebas unitarias y construcción local de la imagen) y **terminará exitosamente en VERDE**, mostrando un mensaje amigable indicando que se omite la publicación remota.
 
-### B. Cuatro Refactorizaciones Realizadas
-1. **Refactorización 1 - Inyección de Estrategias:** Migración de condicionales extensos de reglas a un patrón `Strategy` gestionado por `EvaluadorReglaFactory`.
-2. **Refactorización 2 - Desacoplamiento de Persistencia con Variables de Entorno:** Modificación de `HibernateUtil.java` para resolver dinámicamente el host de base de datos (`DB_HOST`), permitiendo alternancia transparente entre desarrollo local (`localhost`) y contenedores Docker (`db`).
-3. **Refactorización 3 - Extracción de Métodos de Validación en Servicios:** Modularización de lógica de validación de entradas de casos de uso para mejorar legibilidad y reusabilidad.
-4. **Refactorización 4 - Optimización del Empaquetado WAR:** Estandarización de `ROOT.war` para eliminar contextos anidados en Tomcat y mejorar tiempos de respuesta HTTP.
+Si usted desea probar la funcionalidad de subida a **Docker Hub**:
+
+> [!WARNING]  
+> **Importante:** Deberá configurar **sus propias credenciales personales**. La imagen generada **se subirá exclusivamente a su propio repositorio de Docker Hub**, nunca al del estudiante (`andresveas`), asegurando que ningún tercero pueda escribir en el repositorio del autor.
+
+#### Pasos para configurar sus credenciales en Jenkins:
+1. En el panel de Jenkins ([http://localhost:8081](http://localhost:8081)), vaya a:  
+   **Manage Jenkins** > **Credentials** > **System** > **Global credentials (unrestricted)**.
+2. Haga clic en **+ Add Credentials**.
+3. Complete el formulario con sus datos:
+   * **Kind:** `Username with password`
+   * **Username:** Su nombre de usuario en Docker Hub (ejemplo: `mi-usuario-docker`).
+   * **Password:** Su Personal Access Token o contraseña de Docker Hub.
+   * **ID:** `dockerhub-credentials` *(es crucial que el ID sea exactamente este)*.
+4. Haga clic en **Create**.
+
+#### Resultado automático:
+Al volver a hacer clic en **Build Now**:
+* El pipeline detectará automáticamente su usuario configurado.
+* Consultará la API de Docker Hub para obtener el siguiente número de versión correlativo (`1.0.X`).
+* Etiquetará la imagen como:
+  ```text
+  <su-usuario-docker>/owl-audit-app:1.0.X
+  <su-usuario-docker>/owl-audit-app:latest
+  ```
+* Iniciará sesión y la publicará en **su propia cuenta de Docker Hub**.
 
 ---
 
-## 🧹 6. Limpieza y Detención de Contenedores
+## 🧹 5. Limpieza y Detención de Contenedores
 
 Una vez finalizada la revisión, puede detener y remover los contenedores con los siguientes comandos:
 
@@ -231,7 +241,7 @@ docker network rm app-net
 docker rm -f mi-jenkins
 ```
 
-*(Si desea eliminar también las imágenes descargadas para liberar espacio en disco):*
+*(Opcional: Si desea eliminar también las imágenes descargadas para liberar espacio en disco):*
 ```bash
 docker rmi andresveas/owl-audit-app:latest andresveas/mariadb-owlaudit:latest andresveas/jenkins-owlaudit:latest
 ```
