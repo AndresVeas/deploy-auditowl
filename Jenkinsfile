@@ -31,9 +31,6 @@ pipeline {
         }
 
         stage('3. Build Docker Image') {
-            when {
-                branch 'main'
-            }
             steps {
                 echo 'Copiando el archivo .war compilado y empaquetando en Tomcat...'
                 sh '''
@@ -45,9 +42,6 @@ pipeline {
         }
 
         stage('4. Push to Docker Hub') {
-            when {
-                branch 'main'
-            }
             environment {
                 DOCKER_HUB_CREDS = credentials('dockerhub-credentials')
             }
@@ -63,7 +57,7 @@ pipeline {
 
     post {
         success {
-            echo "Pipeline completado con éxito. La imagen ${IMAGE_NAME}:${IMAGE_TAG} está lista."
+            echo "Pipeline completado con éxito. La imagen ${IMAGE_NAME}:${IMAGE_TAG} está lista en Docker Hub."
         }
         failure {
             echo "Hubo un error durante la compilación, pruebas o despliegue."

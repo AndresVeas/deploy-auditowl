@@ -25,7 +25,7 @@ services:
 
   # Servicio Web (Tomcat con el WAR dentro)
   app:
-    image: owlaudit/owl-audit-app:latest
+    image: andresveas/owl-audit-app:latest
     container_name: app-tomcat
     restart: unless-stopped
     ports:
