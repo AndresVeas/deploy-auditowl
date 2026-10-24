@@ -4,6 +4,16 @@ Este repositorio contiene la infraestructura automatizada con **Docker**, **Dock
 
 ---
 
+## 📚 Documentación Oficial Detallada
+
+Para consultar la guía especializada según su necesidad:
+
+1. 🎓 **[Guía de Evaluación para el Profesor / Evaluador](./GUIA_EVALUADOR_PROFESOR.md):** Instrucciones paso a paso para descargar las imágenes directamente desde Docker Hub y probar tanto la aplicación como Jenkins **sin necesidad de clonar repositorios ni compilar código**.
+2. 👥 **[Guía para el Equipo de Desarrollo](./GUIA_EQUIPO_DESARROLLO.md):** Manual de desarrollo local, conexión a base de datos, ejecución de pruebas unitarias y configuración de credenciales de Docker Hub en Jenkins (para Erick y compañeros).
+3. 🏛️ **[Arquitectura y Estructura del Repositorio](./ARQUITECTURA_Y_ESTRUCTURA_DEPLOY.md):** Explicación exhaustiva del propósito técnico de cada archivo, scripts de versionamiento dinámico, Dockerfiles e inicialización automática de Jenkins con Groovy.
+
+---
+
 ## 🚀 Guía Rápida para Compañeros y Evaluadores
 
 Tienes dos formas de utilizar este repositorio según tu rol:
