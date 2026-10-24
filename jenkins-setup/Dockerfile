@@ -20,5 +20,5 @@ RUN jenkins-plugin-cli --plugins git workflow-aggregator
 # Copiar script de inicialización para crear el Pipeline OwlAudit automáticamente
 COPY init.groovy.d/ /usr/share/jenkins/ref/init.groovy.d/
 
-# Asegurar permisos para el usuario jenkins
-USER jenkins
+# Mantener usuario root para tener permisos garantizados sobre /var/run/docker.sock
+USER root
