@@ -7,7 +7,7 @@ pipeline {
         APP_BRANCH   = 'main'
 
         // Configuración de imagen para Docker Hub
-        IMAGE_NAME   = 'owlaudit/owl-audit-app'
+        IMAGE_NAME   = 'andresveas/owl-audit-app'
         IMAGE_TAG    = 'latest'
     }
 
