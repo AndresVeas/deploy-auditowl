@@ -14,5 +14,11 @@ RUN apt-get update && apt-get install -y \
     apt-get update && apt-get install -y docker-ce-cli maven && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# Pre-instalar plugins oficiales de Pipeline y Git para que no requieran descarga manual
+RUN jenkins-plugin-cli --plugins git workflow-aggregator
+
+# Copiar script de inicialización para crear el Pipeline OwlAudit automáticamente
+COPY init.groovy.d/ /usr/share/jenkins/ref/init.groovy.d/
+
 # Asegurar permisos para el usuario jenkins
 USER jenkins

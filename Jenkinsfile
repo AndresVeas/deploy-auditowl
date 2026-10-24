@@ -6,9 +6,8 @@ pipeline {
         APP_REPO_URL = 'https://github.com/ErickBaja05/GR4_1BT3_622_26B.git'
         APP_BRANCH   = 'main'
 
-        // Configuración de imagen para Docker Hub
-        IMAGE_NAME   = 'andresveas/owl-audit-app'
-        IMAGE_TAG    = 'latest'
+        // Versión dinámica basada en el número de build (1.0.1, 1.0.2, 1.0.3...)
+        IMAGE_TAG    = "1.0.${BUILD_NUMBER}"
     }
 
     stages {
@@ -32,38 +31,51 @@ pipeline {
 
         stage('3. Build Docker Image') {
             steps {
-                echo 'Copiando el archivo .war compilado y empaquetando en Tomcat...'
+                echo "Copiando el archivo .war y empaquetando imagen base local..."
                 sh '''
                     mkdir -p target
                     cp source-code/target/*.war target/
-                    docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
+                    docker build -t owl-audit-app:latest .
                 '''
             }
         }
 
         stage('4. Push to Docker Hub') {
-            environment {
-                DOCKER_HUB_CREDS = credentials('dockerhub-credentials')
-            }
             steps {
-                echo 'Autenticando y subiendo imagen terminada a Docker Hub...'
-                sh """
-                    echo "${DOCKER_HUB_CREDS_PSW}" | docker login -u "${DOCKER_HUB_CREDS_USR}" --password-stdin
-                    docker push ${IMAGE_NAME}:${IMAGE_TAG}
-                """
+                script {
+                    try {
+                        withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                            // Toma dinámicamente el usuario de quien puso las credenciales
+                            def targetRepo = "${DOCKER_USER}/owl-audit-app"
+                            echo "Autenticando y publicando en Docker Hub para el usuario '${DOCKER_USER}'..."
+                            sh """
+                                echo "${DOCKER_PASS}" | docker login -u "${DOCKER_USER}" --password-stdin
+                                docker tag owl-audit-app:latest ${targetRepo}:${IMAGE_TAG}
+                                docker tag owl-audit-app:latest ${targetRepo}:latest
+                                docker push ${targetRepo}:${IMAGE_TAG}
+                                docker push ${targetRepo}:latest
+                            """
+                        }
+                    } catch (Exception e) {
+                        echo "=========================================================================="
+                        echo "[AVISO] No se encontraron credenciales 'dockerhub-credentials' en este Jenkins."
+                        echo "Se omite la subida a Docker Hub. (La imagen local se construyó con éxito)."
+                        echo "=========================================================================="
+                    }
+                }
             }
         }
     }
 
     post {
         success {
-            echo "Pipeline completado con éxito. La imagen ${IMAGE_NAME}:${IMAGE_TAG} está lista en Docker Hub."
+            echo "Pipeline completado con éxito para la versión ${IMAGE_TAG}."
         }
         failure {
             echo "Hubo un error durante la compilación, pruebas o despliegue."
         }
         always {
-            // Limpia la sesión de Docker en el agente
+            // Limpia la sesión de Docker en el agente si hubo login
             sh 'docker logout || true'
         }
     }

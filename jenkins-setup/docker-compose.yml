@@ -1,17 +1,18 @@
 services:
   jenkins:
     build: .
+    image: andresveas/jenkins-owlaudit:latest
     container_name: jenkins-server
     restart: unless-stopped
     ports:
-      - "8081:8080"      # Acceso a la interfaz web (evita conflicto con Tomcat en el 8080)
+      - "8081:8080"      # Acceso a la interfaz web
       - "50000:50000"    # Comunicación entre agentes
     volumes:
       - jenkins_data:/var/jenkins_home
-      - /var/run/docker.sock:/var/run/docker.sock # Permite ejecutar comandos 'docker' desde Jenkins
+      - /var/run/docker.sock:/var/run/docker.sock # Permite ejecutar 'docker' desde Jenkins
     environment:
       - TZ=America/Guayaquil
-    user: root # Facilita el acceso directo al socket de Docker en entornos locales
+    user: root
 
 volumes:
   jenkins_data:
