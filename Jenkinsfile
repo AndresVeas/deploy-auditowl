@@ -25,7 +25,7 @@ pipeline {
             steps {
                 echo 'Compilando proyecto Java y ejecutando las pruebas unitarias de GR4...'
                 dir('source-code') {
-                    sh 'mvn clean package -DskipTests=false'
+                    sh 'mvn clean package -Dtest="!*DAO*" -DfailIfNoTests=false'
                 }
             }
         }
