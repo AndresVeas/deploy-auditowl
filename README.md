@@ -106,16 +106,27 @@ Para cumplir con el requerimiento académico de la entrega:
 ```text
 deploy-auditowl/
 ├── README.md                          # Guía de uso rápido del repositorio
+├── GUIA_EVALUADOR_PROFESOR.md         # Manual paso a paso para el docente (imágenes Docker Hub)
+├── GUIA_EQUIPO_DESARROLLO.md          # Manual de desarrollo local y CI/CD
+├── ARQUITECTURA_Y_ESTRUCTURA_DEPLOY.md# Documentación técnica de arquitectura
 ├── Dockerfile                         # Runtime Tomcat 10.1 con JDK 21
 ├── Jenkinsfile                        # Pipeline de compilación, tests y publicación
-├── docker-compose.yml                 # Orquestación de Tomcat + MariaDB (Red bridge)
+├── docker-compose.yml                 # Orquestación de Tomcat + MariaDB local
 ├── deploy.bat / deploy.sh             # Scripts de inicio de Tomcat y MariaDB
 ├── stop-deploy.bat / stop-deploy.sh   # Scripts de apagado de Tomcat y MariaDB
 ├── db/
+│   ├── Dockerfile                     # Imagen personalizada de MariaDB con semillas
 │   └── init.sql                       # Esquema y semillas iniciales de MariaDB
+├── docker-compose-deploy/             # Despliegue modular para evaluación docente y video
+│   ├── README.md                      # Explicación de despliegue rápido con Docker Hub
+│   ├── app/
+│   │   └── docker-compose.yml         # Despliegue MariaDB + Tomcat WebApp (imágenes Docker Hub)
+│   └── jenkins/
+│       └── docker-compose.yml         # Despliegue Jenkins CI/CD (con Docker Socket)
 └── jenkins-setup/
     ├── Dockerfile                     # Jenkins LTS con JDK 21, Docker CLI y Maven
     ├── docker-compose.yml             # Servicio del servidor Jenkins (Puerto 8081)
+    ├── init.groovy.d/                 # Autoprovisión del job OwlAudit-Pipeline
     ├── start-jenkins.bat / .sh        # Inicia Jenkins y muestra la clave temporal
     └── stop-jenkins.bat / .sh         # Detiene Jenkins preservando datos
 ```

@@ -75,7 +75,14 @@ docker run -d \
 
 ### Opción B: Despliegue en un solo paso con Docker Compose
 
-Si prefiere utilizar Docker Compose, puede guardar el siguiente contenido en un archivo llamado `docker-compose.yml` y ejecutar `docker compose up -d`:
+Si tiene este repositorio clonado, simplemente ingrese a la carpeta `docker-compose-deploy/app` y ejecute:
+
+```bash
+cd docker-compose-deploy/app
+docker compose up -d
+```
+
+*(Si no clonó el repositorio, puede guardar el siguiente contenido en un archivo `docker-compose.yml` y ejecutar `docker compose up -d`):*
 
 ```yaml
 services:
@@ -148,7 +155,18 @@ Se ha preparado una imagen personalizada de Jenkins (`andresveas/jenkins-owlaudi
 
 ### Paso 1: Ejecutar el Contenedor de Jenkins
 
-Ejecute en su terminal:
+#### Opción A: Con Docker Compose (Recomendada si tiene el repositorio)
+Navegue a la subcarpeta `docker-compose-deploy/jenkins` y ejecute:
+```bash
+cd docker-compose-deploy/jenkins
+docker compose up -d
+```
+*(Este comando levanta automáticamente el contenedor `mi-jenkins` con los puertos `8081` y `50000`, montando el socket `/var/run/docker.sock` y persistiendo datos en un volumen).*
+
+---
+
+#### Opción B: Con comando directo `docker run`
+Si prefiere no usar Compose o ejecutar directamente la imagen:
 
 * **En Linux / macOS / Git Bash:**
   ```bash

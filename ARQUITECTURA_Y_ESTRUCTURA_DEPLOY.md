@@ -25,9 +25,16 @@ deploy-auditowl/
 │   ├── Dockerfile                         # Imagen MariaDB con semilla de inicialización inyectada
 │   └── init.sql                           # Script DDL/DML con esquema y usuarios de prueba
 │
-└── jenkins-setup/                         # Módulo de infraestructura CI/CD de Jenkins
+├── docker-compose-deploy/                 # Módulo de despliegue modular para evaluación y demostración en video
+│   ├── README.md                          # Manual de uso rápido de los docker compose de evaluación
+│   ├── app/                               # Submódulo Aplicación Web + MariaDB
+│   │   └── docker-compose.yml             # Orquesta MariaDB y Tomcat usando directamente imágenes de Docker Hub
+│   └── jenkins/                           # Submódulo Servidor CI/CD
+│       └── docker-compose.yml             # Orquesta Jenkins usando la imagen publicada con Docker Socket montado
+│
+└── jenkins-setup/                         # Módulo de infraestructura y construcción de imagen Jenkins
     ├── Dockerfile                         # Imagen de Jenkins con Docker CLI, Maven, Git y plugins
-    ├── docker-compose.yml                 # Orquestación de Jenkins con mapeo de Docker Socket
+    ├── docker-compose.yml                 # Orquestación de Jenkins local con mapeo de Docker Socket
     ├── start-jenkins.bat                  # Script de inicio e impresión de clave de admin para Windows
     ├── start-jenkins.sh                   # Script de inicio e impresión de clave de admin para Linux / macOS
     ├── stop-jenkins.bat                   # Script de apagado de Jenkins para Windows
@@ -126,6 +133,17 @@ deploy-auditowl/
 
 #### `jenkins-setup/start-jenkins.bat` y `start-jenkins.sh`
 * **Propósito:** Levantan el contenedor de Jenkins con Docker Compose, esperan a que el servicio inicialice y leen automáticamente `/var/jenkins_home/secrets/initialAdminPassword`, imprimiendo la clave de administrador en la consola para una experiencia sin fricciones.
+
+### C. Módulo de Despliegue Modular (`docker-compose-deploy/`)
+
+Diseñado expresamente para la sustentación, evaluación docente y grabaciones explicativas:
+
+#### `docker-compose-deploy/app/docker-compose.yml`
+* **Propósito:** Permite levantar exclusivamente los servicios de la aplicación web (`webapp` en Tomcat 10.1 puerto 8080) y la base de datos (`db` en MariaDB 11.4 puerto 3306) descargando directamente las imágenes oficiales de Docker Hub (`andresveas/owl-audit-app:latest` y `andresveas/mariadb-owlaudit:latest`), sin compilar código localmente.
+* **Red y Volúmenes:** Conectados a la red bridge `app-net` y persistidos en el volumen `db_data`.
+
+#### `docker-compose-deploy/jenkins/docker-compose.yml`
+* **Propósito:** Permite levantar el servidor de integración continua Jenkins (`mi-jenkins` en el puerto 8081) descargando la imagen `andresveas/jenkins-owlaudit:latest` con acceso al daemon anfitrión mediante `/var/run/docker.sock` y persistencia en `jenkins_data`. Elimina la necesidad de escribir comandos `docker run` largos en la terminal durante el video.
 
 ---
 
